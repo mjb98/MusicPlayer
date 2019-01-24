@@ -27,14 +27,16 @@ public class MusicListFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private MusicLab mMusicLab;
     private MusicAdapter mMusicAdapter;
+    public static final String MUSICLAB_TAG = "musicplayer.musiclist";
 
 
     public MusicListFragment() {
         // Required empty public constructor
     }
-    public static MusicListFragment newInstance() {
+    public static MusicListFragment newInstance(MusicLab MusicLab) {
         MusicListFragment fragment = new MusicListFragment();
         Bundle args = new Bundle();
+        args.putSerializable(MUSICLAB_TAG,MusicLab);
         fragment.setArguments(args);
         return fragment;
     }
@@ -42,14 +44,14 @@ public class MusicListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMusicLab = new MusicLab(getActivity());
+        mMusicLab = (MusicLab) getArguments().getSerializable(MUSICLAB_TAG);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_music_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_list, container, false);
         mRecyclerView = view.findViewById(R.id.song_list_recyclerview);
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),getResources().getInteger(R.integer.columns_count)));
         mMusicAdapter = new MusicAdapter(mMusicLab.getMusicList());
@@ -98,7 +100,7 @@ public class MusicListFragment extends Fragment {
         @NonNull
         @Override
         public MusicHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(getActivity()).inflate(R.layout.recyclerview_item, parent, false);
+            View view = LayoutInflater.from(getActivity()).inflate(R.layout.recyclerview_music_item, parent, false);
             return new MusicHolder(view);
         }
 

@@ -1,5 +1,7 @@
 package com.example.mjb.musicplayer.model;
 
+import android.support.annotation.Nullable;
+
 import java.io.Serializable;
 
 public class Music implements Serializable {
@@ -57,5 +59,18 @@ public class Music implements Serializable {
 
     public void setArtist(String artist) {
         this.artist = artist;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+       if (obj instanceof  Music){
+           Music music = (Music) obj;
+           if (this.getTitle().equals(music.getTitle())&& this.getArtist().equals(music.getArtist())&&this.album.equals(music.getAlbum())){
+               return true;
+           }else {
+               return false;
+           }
+
+       }else return false;
     }
 }

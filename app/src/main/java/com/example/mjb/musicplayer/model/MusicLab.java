@@ -4,20 +4,22 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 
 import com.example.mjb.todo.utils.PictureUtils;
-import com.example.mjb.todo.utils.PictureUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MusicLab {
+public class MusicLab implements Serializable {
 
 
     public MusicLab(Activity activity) {
-        loadAudio(activity);
+        mArtistList = new ArrayList<>();
+        loadMusics(activity);
 
 
 
@@ -28,9 +30,17 @@ public class MusicLab {
     }
 
     private List<Music> mMusicList;
+    private List<Artist> mArtistList;
 
+    public List<Artist> getArtistList() {
+        return mArtistList;
+    }
 
-    private void loadAudio(Activity activity) {
+    public void setArtistList(List<Artist> artistList) {
+        mArtistList = artistList;
+    }
+
+    private void loadMusics(Activity activity) {
         ContentResolver contentResolver = activity.getContentResolver();
 
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
@@ -52,12 +62,27 @@ public class MusicLab {
                 Uri sArtworkUri = Uri
                         .parse("content://media/external/audio/albumart");
                 Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
-                String  coverpath = PictureUtils.getImageRealPath(contentResolver,albumArtUri);
+                String coverpath = PictureUtils.getImageRealPath(contentResolver, albumArtUri);
+                Music song = new Music(path, title, album, artist, coverpath);
+                if (!mMusicList.contains(song)) {
+                    mMusicList.add(song);
 
+                    Boolean contains = false;
+                    for (Artist artist1 : mArtistList) {
+                        if (artist1.getName().equals(artist)) {
 
+                            artist1.addSong(song);
+                            contains = true;
+                        }
+                    }
+                    if (!contains) {
+                        Artist newArtist = new Artist(artist);
+                        newArtist.addSong(song);
+                        mArtistList.add(newArtist);
 
-                // Save to audioList
-                mMusicList.add(new Music(path, title, album, artist,coverpath));
+                    }
+
+                }
             }
 
         }

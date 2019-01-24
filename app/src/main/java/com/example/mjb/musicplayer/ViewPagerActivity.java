@@ -23,6 +23,7 @@ public class ViewPagerActivity extends AppCompatActivity {
     TabItem mTabItemLeft;
     TabItem mTabItemCenter;
     TabItem mTabItemRight;
+    MusicLab mMusicLab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,14 +34,21 @@ public class ViewPagerActivity extends AppCompatActivity {
         mTabItemLeft = findViewById(R.id.tab_left);
         mTabItemCenter = findViewById(R.id.tab_center);
         mTabItemRight = findViewById(R.id.tab_right);
-        mViewPager.setOffscreenPageLimit(1);
+        mViewPager.setOffscreenPageLimit(2);
+        mMusicLab = new MusicLab(this);
 
         mViewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
 
 
             @Override
             public Fragment getItem(int position) {
-               return MusicListFragment.newInstance();
+                switch (position){
+                    case 0 :return MusicListFragment.newInstance(mMusicLab);
+                    case 1 : return ArtistListFragment.newInstance(mMusicLab);
+                    case 2 : return ArtistListFragment.newInstance(mMusicLab);
+                    default:return null;
+                }
+
             }
 
             @Nullable
