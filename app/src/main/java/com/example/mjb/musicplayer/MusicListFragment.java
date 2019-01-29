@@ -91,16 +91,7 @@ public class MusicListFragment extends Fragment {
             coverart = itemView.findViewById(R.id.item_song_cover);
             titleTextview = itemView.findViewById(R.id.item_song_title);
             artistTextView = itemView.findViewById(R.id.item_song_artist);
-           itemView.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View v) {
-                   if(mAlbum != null){
-                       Intent intent = Player.newIntent(new ArrayList<Music>(mAlbum.getMusicList()),mAlbum.getMusicList().indexOf(mMusic),getActivity());
-                       startActivity(intent);
 
-                   }
-               }
-           });
         }
         public void bindMusic(Music music) {
             mMusic = music;
@@ -132,9 +123,22 @@ public class MusicListFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull MusicHolder holder, int position) {
+        public void onBindViewHolder(@NonNull MusicHolder holder, final int position) {
             Music music = mMusicList.get(position);
             holder.bindMusic(music);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent;
+                    if(mAlbum != null) {
+                        intent = Player.newIntent(new ArrayList<Music>(mAlbum.getMusicList()), position, getActivity());
+                    }else
+                        intent = Player.newIntent(new ArrayList<Music>(mMusicLab.getMusicList()),position,getActivity());
+                    startActivity(intent);
+
+
+                }
+            });
 
         }
 

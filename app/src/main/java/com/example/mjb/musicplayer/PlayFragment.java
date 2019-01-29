@@ -30,9 +30,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PlayFragment extends Fragment {
    private CircleImageView mCoverArt;
-   private Button playButton,nextButton,previousButton;
+   private Button playButton,nextButton,previousButton,repeatButton,repeatAllButton;
    private SeekBar timeSeekBar;
-   private   TextView elapsedTextView,remainingTextView,nameTextField,artistTextFiled;
+   private   TextView elapsedTextView,remainingTextView,nameTextField,artistTextFiled,nextTextView;
    private MediaPlayer mMediaPlayer;
    private int totalTime;
    private List<Music> mMusicList;
@@ -103,19 +103,54 @@ public class PlayFragment extends Fragment {
         nameTextField = view.findViewById(R.id.musicname_playing);
         artistTextFiled = view.findViewById(R.id.artistname_playing);
         number = getArguments().getInt("number");
+        nextTextView = view.findViewById(R.id.next_textview);
+        repeatButton = view.findViewById(R.id.repeat_button);
+        repeatAllButton = view.findViewById(R.id.refresh_button);
+        repeatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ChangeMusicTo(number);
+            }
+        });
+        repeatAllButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ChangeMusicTo(0);
+            }
+        });
+
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(number == mMusicList.size()-1)
+                    number = -1;
 
-                ChangeMusicTo((number+1)%mMusicList.size());
+                ChangeMusicTo(number+1);
             }
         });
         previousButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChangeMusicTo((number-1)%mMusicList.size());
+                if (number != 0)
+                    number = number -1;
+                ChangeMusicTo((number)%mMusicList.size());
             }
         });
+
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(!mMediaPlayer.isPlaying())
+                    mMediaPlayer.start();
+                else
+                    mMediaPlayer.pause();
+                detectPlayButton();
+
+
+            }
+        });
+        ChangeMusicTo(number);
 
         timeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -160,18 +195,7 @@ public class PlayFragment extends Fragment {
         thread.start();
 
 
-        playButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                detectPlayButton();
-                if(!mMediaPlayer.isPlaying())
-                    mMediaPlayer.start();
-                    else
-                    mMediaPlayer.pause();
 
-
-            }
-        });
 
         return view;
     }
@@ -220,18 +244,24 @@ return timelabel;
     }
     private void ChangeMusicTo(int Number){
 
-    mMediaPlayer.stop();
-    number = Number;
-    mCurrentMusic = mMusicList.get(number);
+   if(mMediaPlayer != null)
+       mMediaPlayer.stop();
+        number = Number;
+        mCurrentMusic = mMusicList.get(number);
+        mMediaPlayer = MediaPlayer.create(getActivity(),Uri.fromFile(new File(mCurrentMusic.getPath())));
+
         artistTextFiled.setText(" -"+mCurrentMusic.getArtist());
         nameTextField.setText(mCurrentMusic.getTitle());
         mMediaPlayer.seekTo(0);
-        mMediaPlayer.setVolume(0.5f,0.5f);
         mMediaPlayer.isLooping();
         totalTime = mMediaPlayer.getDuration();
         timeSeekBar.setMax(totalTime);
-        mCoverArt.setImageBitmap(PictureUtils.getScaledBitmap(mCurrentMusic.getCoverPath() != "" ? mCurrentMusic.getCoverPath(),getActivity()));
-    mMediaPlayer = MediaPlayer.create(getActivity(),Uri.fromFile(new File(mCurrentMusic.getPath())));
+        if(mCurrentMusic.getCoverPath() != null)
+        mCoverArt.setImageBitmap(PictureUtils.getScaledBitmap(mCurrentMusic.getCoverPath(),getActivity()));
+        else
+            mCoverArt.setImageResource(R.drawable.music);
+        nextTextView.setText(mMusicList.get(number != mMusicList.size()-1 ? number+1 : 0).getTitle());
+
     mMediaPlayer.start();
     detectPlayButton();
 
