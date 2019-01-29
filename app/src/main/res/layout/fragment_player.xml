@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/darkgray"
+    android:backgroundTint="@color/darkgray"
+    android:gravity="center_horizontal">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/playing_imageview"
+        android:layout_width="196dp"
+        android:layout_height="199dp"
+        android:layout_marginTop="50dp"
+        android:foregroundGravity="center_horizontal"
+        android:scaleType="centerCrop"
+        android:src="@drawable/music"
+        app:civ_border_color="@color/orange"
+        app:civ_border_width="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/elapsTimeLabel2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="00:00"
+        android:textColor="@android:color/white"
+        app:layout_constraintStart_toStartOf="@+id/positionBar"
+        app:layout_constraintTop_toBottomOf="@+id/positionBar" />
+
+    <TextView
+        android:id="@+id/remainingTimeLabel2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="129dp"
+        android:layout_marginLeft="129dp"
+        android:layout_marginTop="16dp"
+        android:text="04:00"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="@+id/positionBar"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/elapsTimeLabel2"
+        app:layout_constraintTop_toBottomOf="@+id/positionBar" />
+
+
+    <SeekBar
+        android:id="@+id/positionBar"
+        style="@android:style/Widget.DeviceDefault.Light.SeekBar"
+        android:layout_width="200dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="93dp"
+        android:layout_marginLeft="93dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="91dp"
+        android:layout_marginRight="91dp"
+        android:hapticFeedbackEnabled="false"
+        android:paddingBottom="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/playing_imageview" />
+
+
+    <Button
+        android:id="@+id/playbtn"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="176dp"
+        android:background="@drawable/play"
+        android:backgroundTint="@color/orange"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/remainingTimeLabel2"
+        app:layout_constraintHorizontal_bias="0.446"
+        app:layout_constraintStart_toStartOf="@+id/elapsTimeLabel2" />
+
+    <TextView
+        android:id="@+id/musicname_playing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/playing_imageview"
+        app:layout_constraintEnd_toStartOf="@+id/artistname_playing"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:text="Eminem" />
+
+    <TextView
+        android:id="@+id/artistname_playing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="TextView"
+        android:textColor="@android:color/tertiary_text_dark"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/playing_imageview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/musicname_playing"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.55"
+        tools:text="  - Rap god" />
+
+    <Button
+        android:id="@+id/next_button"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="112dp"
+        android:layout_marginRight="112dp"
+        android:background="@drawable/next"
+        android:backgroundTint="@color/orange"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.416"
+        app:layout_constraintStart_toEndOf="@+id/playbtn"
+        app:layout_constraintTop_toTopOf="@+id/playbtn" />
+
+    <Button
+        android:id="@+id/previous_button"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/previous"
+        android:backgroundTint="@color/orange"
+        app:layout_constraintEnd_toStartOf="@+id/playbtn"
+        app:layout_constraintHorizontal_bias="0.938"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/playbtn" />
+
+
+</android.support.constraint.ConstraintLayout>

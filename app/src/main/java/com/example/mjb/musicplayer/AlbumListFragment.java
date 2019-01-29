@@ -6,17 +6,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.mjb.musicplayer.model.Artist;
-import com.example.mjb.musicplayer.model.Music;
+import com.example.mjb.musicplayer.model.Album;
 import com.example.mjb.musicplayer.model.MusicLab;
 import com.example.mjb.todo.utils.PictureUtils;
 
@@ -27,24 +24,24 @@ import de.hdodenhof.circleimageview.CircleImageView;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ArtistListFragment extends Fragment {
+public class AlbumListFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private MusicLab mMusicLab;
-    private ArtistAdapter mArtistAdapter;
+    private AlbumAdapter mAlbumAdapter;
 
-    public static final String MUSICLAB_TAG = "artist.musiclist";
+    public static final String MUSICLAB_TAG = "album.musiclist";
 
-    public static ArtistListFragment newInstance(MusicLab Musiclab) {
+    public static AlbumListFragment newInstance(MusicLab Musiclab) {
 
         Bundle args = new Bundle();
         args.putSerializable(MUSICLAB_TAG,Musiclab);
-        ArtistListFragment fragment = new ArtistListFragment();
+        AlbumListFragment fragment = new AlbumListFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
 
-    public ArtistListFragment() {
+    public AlbumListFragment() {
         // Required empty public constructor
     }
 
@@ -60,20 +57,20 @@ public class ArtistListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
         mRecyclerView = view.findViewById(R.id.song_list_recyclerview);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mArtistAdapter = new ArtistAdapter(mMusicLab.getArtistList());
-        mRecyclerView.setAdapter(mArtistAdapter);
+        mAlbumAdapter = new AlbumAdapter(mMusicLab.getAlbumList());
+        mRecyclerView.setAdapter(mAlbumAdapter);
         return view;
     }
 
 
-    private class ArtistHolder extends RecyclerView.ViewHolder {
+    public  class AlbumHolder extends RecyclerView.ViewHolder {
 
         private CircleImageView mCircleImageView;
         private TextView nameTextview,songsTextView;
-        private Artist mArtist;
+        private Album mAlbum;
 
 
-        public ArtistHolder(@NonNull View itemView) {
+        public AlbumHolder(@NonNull View itemView) {
             super(itemView);
 
             mCircleImageView = itemView.findViewById(R.id.artist_item_imageView);
@@ -82,53 +79,53 @@ public class ArtistListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                   Intent intent = ArtistViewActivity.newIntent(mArtist,getActivity());
-                    startActivity(intent );
-
+                    Intent intent = ArtistViewActivity.newIntent(mAlbum,getActivity());
+                    startActivity(intent);
                 }
             });
         }
-        public void bindArtist(Artist artist) {
-            mArtist = artist;
-            nameTextview.setText(artist.getName());
-            songsTextView.setText(artist.getAlbums().size()+" Album  "+artist.getSongs().size()+" song");
-            if(artist.getSongs().get(0).getCoverPath() != null){
-                mCircleImageView.setImageBitmap(PictureUtils.getScaledBitmap(artist.getSongs().get(0).getCoverPath(),getActivity()));
+        public void bindArtist(Album album) {
+            mAlbum = album;
+            nameTextview.setText(album.getName());
+            songsTextView.setText(album.getArtist());
+            if(album.getMusicList().get(0).getCoverPath() != null){
+                mCircleImageView.setImageBitmap(PictureUtils.getScaledBitmap(album.getMusicList().get(0).getCoverPath(),getActivity()));
             }
         }
 
     }
-    private class ArtistAdapter extends  RecyclerView.Adapter<ArtistHolder>{
+    private class AlbumAdapter extends  RecyclerView.Adapter<AlbumHolder>{
 
-        private List<Artist> mArtistList;
+        private List<Album> mAlbumList;
 
-        public ArtistAdapter(List<Artist> artistList) {
-            mArtistList = artistList;
+        public AlbumAdapter(List<Album> albumList) {
+            mAlbumList = albumList;
         }
 
-        public void setArtistList(List<Artist> artistList) {
-            mArtistList = artistList;
+        public void setArtistList(List<Album> albumList) {
+            mAlbumList = albumList;
         }
 
         @NonNull
         @Override
-        public ArtistHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public AlbumHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(getActivity()).inflate(R.layout.recyclerview_artist_item, parent, false);
-            return new ArtistHolder(view);
+            return new AlbumHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ArtistHolder holder, int position) {
-            Artist artist = mArtistList.get(position);
-            holder.bindArtist(artist);
+        public void onBindViewHolder(@NonNull AlbumHolder holder, int position) {
+            Album album = mAlbumList.get(position);
+            holder.bindArtist(album);
 
         }
 
         @Override
         public int getItemCount() {
-            return mArtistList.size();
+            return mAlbumList.size();
         }
     }
+
 
 }
 

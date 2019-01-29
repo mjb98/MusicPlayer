@@ -45,7 +45,7 @@ public class ViewPagerActivity extends AppCompatActivity {
                 switch (position){
                     case 0 :return MusicListFragment.newInstance(mMusicLab);
                     case 1 : return ArtistListFragment.newInstance(mMusicLab);
-                    case 2 : return ArtistListFragment.newInstance(mMusicLab);
+                    case 2 : return AlbumListFragment.newInstance(mMusicLab);
                     default:return null;
                 }
 

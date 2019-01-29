@@ -16,9 +16,13 @@ import java.util.List;
 
 public class MusicLab implements Serializable {
 
+    public List<Album> getAlbumList() {
+        return mAlbumList;
+    }
 
     public MusicLab(Activity activity) {
         mArtistList = new ArrayList<>();
+        mAlbumList = new ArrayList<>();
         loadMusics(activity);
 
 
@@ -31,6 +35,7 @@ public class MusicLab implements Serializable {
 
     private List<Music> mMusicList;
     private List<Artist> mArtistList;
+    private List<Album> mAlbumList;
 
     public List<Artist> getArtistList() {
         return mArtistList;
@@ -67,20 +72,39 @@ public class MusicLab implements Serializable {
                 if (!mMusicList.contains(song)) {
                     mMusicList.add(song);
 
-                    Boolean contains = false;
-                    for (Artist artist1 : mArtistList) {
-                        if (artist1.getName().equals(artist)) {
 
-                            artist1.addSong(song);
-                            contains = true;
+                   Artist newArtist = new Artist(artist);
+                   Album  newAlbum =  new Album(artist,album);
+                    Boolean containsAlbum = false;
+                    for (Album album1 : mAlbumList) {
+                        if (album1.getName().equals(album)) {
+                            newAlbum = album1;
+                            newAlbum.addSong(song);
+                            containsAlbum = true;
                         }
                     }
-                    if (!contains) {
-                        Artist newArtist = new Artist(artist);
+                    if (!containsAlbum) {
+                        newAlbum = new Album(album,artist);
+                        newAlbum.addSong(song);
+                        mAlbumList.add(newAlbum);
+
+                    }
+                    Boolean containsArtist = false;
+                    for (Artist artist1 : mArtistList) {
+                        if (artist1.getName().equals(artist)) {
+                            newArtist = artist1;
+                            newArtist.addSong(song);
+                            containsArtist = true;
+                        }
+                    }
+                    if (!containsArtist) {
+                        newArtist = new Artist(artist);
                         newArtist.addSong(song);
                         mArtistList.add(newArtist);
 
                     }
+                    if (!newArtist.getAlbums().contains(newAlbum))
+                    newArtist.getAlbums().add(newAlbum);
 
                 }
             }

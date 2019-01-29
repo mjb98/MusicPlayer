@@ -10,10 +10,18 @@ public class Artist implements Serializable {
 
     private String name;
     private List<Music> songs;
+    private  List<Album> Albums;
+
+    public List<Album> getAlbums() {
+        return Albums;
+    }
 
     public Artist(String name) {
         this.name = name;
        this.songs = new ArrayList<>();
+       this.Albums = new ArrayList<>();
+
+
     }
 
     public String getName() {

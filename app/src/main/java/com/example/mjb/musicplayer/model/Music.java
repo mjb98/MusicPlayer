@@ -3,6 +3,8 @@ package com.example.mjb.musicplayer.model;
 import android.support.annotation.Nullable;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Music implements Serializable {
 
@@ -18,6 +20,7 @@ public class Music implements Serializable {
         this.album = album;
         this.artist = artist;
         this.coverPath = coverPath;
+
     }
 
     public String getCoverPath() {
