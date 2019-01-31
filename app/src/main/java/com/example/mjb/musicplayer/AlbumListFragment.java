@@ -89,7 +89,7 @@ public class AlbumListFragment extends Fragment {
             nameTextview.setText(album.getName());
             songsTextView.setText(album.getArtist());
             if(album.getMusicList().get(0).getCoverPath() != null){
-                mCircleImageView.setImageBitmap(PictureUtils.getScaledBitmap(album.getMusicList().get(0).getCoverPath(),getActivity()));
+                mCircleImageView.setImageBitmap(PictureUtils.getScaledBitmap(album.getMusicList().get(0).getCoverPath(),100,100));
             }
         }
 

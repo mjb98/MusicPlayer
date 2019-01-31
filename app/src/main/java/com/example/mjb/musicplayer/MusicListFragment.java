@@ -86,18 +86,30 @@ public class MusicListFragment extends Fragment {
         private Music mMusic;
 
 
-        public MusicHolder(@NonNull View itemView) {
+        public MusicHolder(@NonNull final View itemView) {
             super(itemView);
             coverart = itemView.findViewById(R.id.item_song_cover);
             titleTextview = itemView.findViewById(R.id.item_song_title);
             artistTextView = itemView.findViewById(R.id.item_song_artist);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent;
+                    if(mAlbum != null) {
+                        intent = Player.newIntent(new ArrayList<Music>(mAlbum.getMusicList()), getAdapterPosition(), getActivity());
+                    }else
+                        intent = Player.newIntent(new ArrayList<Music>(mMusicLab.getMusicList()),getAdapterPosition(),getActivity());
+                    startActivity(intent);
+
+
+                }
+            });
 
         }
         public void bindMusic(Music music) {
             mMusic = music;
             if (music.getCoverPath() != null)
-            coverart.setImageBitmap(PictureUtils.getScaledBitmap(music.getCoverPath(),getActivity()));
-
+            coverart.setImageBitmap(PictureUtils.getScaledBitmap(music.getCoverPath(),400,400));
             titleTextview.setText(music.getTitle() != null ? music.getTitle() : "Unknon title");
             artistTextView.setText(music.getArtist() != null ? music.getArtist() : "Unknon Artist");
         }
@@ -126,19 +138,7 @@ public class MusicListFragment extends Fragment {
         public void onBindViewHolder(@NonNull MusicHolder holder, final int position) {
             Music music = mMusicList.get(position);
             holder.bindMusic(music);
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent;
-                    if(mAlbum != null) {
-                        intent = Player.newIntent(new ArrayList<Music>(mAlbum.getMusicList()), position, getActivity());
-                    }else
-                        intent = Player.newIntent(new ArrayList<Music>(mMusicLab.getMusicList()),position,getActivity());
-                    startActivity(intent);
 
-
-                }
-            });
 
         }
 

@@ -24,12 +24,6 @@ public class Player extends AppCompatActivity {
 
 
     public Fragment createFragment() {
-        if (mAlbum != null) {
-            return PlayFragment.newInstance(mAlbum, number);
-        }
-        if (mArtist != null){
-            return PlayFragment.newInstance(mArtist, number);
-    }
     if(mMusicList != null)
         return  PlayFragment.newInstance(mMusicList,number);
 

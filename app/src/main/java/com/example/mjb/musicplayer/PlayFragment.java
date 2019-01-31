@@ -1,11 +1,13 @@
 package com.example.mjb.musicplayer;
 
+import android.annotation.SuppressLint;
+import android.content.res.ColorStateList;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.ThemedSpinnerAdapter;
 
 import com.example.mjb.musicplayer.model.Album;
 import com.example.mjb.musicplayer.model.Artist;
@@ -21,8 +22,8 @@ import com.example.mjb.musicplayer.model.Music;
 import com.example.mjb.todo.utils.PictureUtils;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -30,35 +31,50 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PlayFragment extends Fragment {
    private CircleImageView mCoverArt;
-   private Button playButton,nextButton,previousButton,repeatButton,repeatAllButton;
+   private Button playButton,nextButton,previousButton,repeatButton,repeatAllButton,shuffleButton;
    private SeekBar timeSeekBar;
    private   TextView elapsedTextView,remainingTextView,nameTextField,artistTextFiled,nextTextView;
    private MediaPlayer mMediaPlayer;
    private int totalTime;
-   private List<Music> mMusicList;
+   private List<Music> playingMusicList;
+   private List<Music> OrginalMusicList;
    private Album mAlbum;
    private Artist mArtist;
    private Music mCurrentMusic;
    private int number;
+   private Boolean ShuffleMode = false;
 
-    public static PlayFragment newInstance(Album album,int number) {
-
-        Bundle args = new Bundle();
-        args.putSerializable("albumseted",album);
-        args.putInt("number",number);
-        PlayFragment fragment = new PlayFragment();
-        fragment.setArguments(args);
-        return fragment;
+    public Boolean getShuffleMode() {
+        return ShuffleMode;
     }
-    public static PlayFragment newInstance(Artist artist,int number) {
 
-        Bundle args = new Bundle();
-        args.putSerializable("artistseted",artist);
-        args.putInt("number",number);
-        PlayFragment fragment = new PlayFragment();
-        fragment.setArguments(args);
-        return fragment;
+    @SuppressLint("NewApi")
+    public void setShuffleMode(Boolean shuffleMode) {
+        if(shuffleMode){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                shuffleButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.orange)));
+            }
+
+            Collections.shuffle(playingMusicList);
+            number = playingMusicList.indexOf(mCurrentMusic);
+            setNextMusicLabel();
+
+
+        }else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                shuffleButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+            }
+
+            playingMusicList =  new ArrayList<>(OrginalMusicList);
+            number = playingMusicList.indexOf(mCurrentMusic);
+            setNextMusicLabel();
+
+        }
+
+
+        ShuffleMode = shuffleMode;
     }
+
     public static PlayFragment newInstance(ArrayList<Music> musicList, int number) {
 
         Bundle args = new Bundle();
@@ -83,15 +99,11 @@ public class PlayFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         mAlbum = (Album) getArguments().getSerializable("albumseted");
         mArtist = (Artist) getArguments().getSerializable("artistseted");
-        if(mArtist != null) {
-            mMusicList = mArtist.getSongs();
-        }
-        if(mAlbum != null) {
-            mMusicList = mAlbum.getMusicList();
-        }
 
-        if(mMusicList == null)
-            mMusicList = (ArrayList<Music>) getArguments().getSerializable("musiclisted");
+        if(playingMusicList == null)
+            OrginalMusicList = (ArrayList<Music>) getArguments().getSerializable("musiclisted");
+        playingMusicList = new ArrayList<>(OrginalMusicList);
+
 
         playButton = view.findViewById(R.id.playbtn);
         nextButton = view.findViewById(R.id.next_button);
@@ -101,6 +113,7 @@ public class PlayFragment extends Fragment {
         elapsedTextView = view.findViewById(R.id.elapsTimeLabel2);
         remainingTextView = view.findViewById(R.id.remainingTimeLabel2);
         nameTextField = view.findViewById(R.id.musicname_playing);
+        shuffleButton = view.findViewById(R.id.shuffle_btn);
         artistTextFiled = view.findViewById(R.id.artistname_playing);
         number = getArguments().getInt("number");
         nextTextView = view.findViewById(R.id.next_textview);
@@ -118,11 +131,17 @@ public class PlayFragment extends Fragment {
                 ChangeMusicTo(0);
             }
         });
+       shuffleButton.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               setShuffleMode(!getShuffleMode());
+           }
+       });
 
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(number == mMusicList.size()-1)
+                if(number == playingMusicList.size()-1)
                     number = -1;
 
                 ChangeMusicTo(number+1);
@@ -133,7 +152,7 @@ public class PlayFragment extends Fragment {
             public void onClick(View v) {
                 if (number != 0)
                     number = number -1;
-                ChangeMusicTo((number)%mMusicList.size());
+                ChangeMusicTo((number)% playingMusicList.size());
             }
         });
 
@@ -238,6 +257,12 @@ return timelabel;
     }
 
     @Override
+    public void onDestroy() {
+    mMediaPlayer.release();
+        super.onDestroy();
+    }
+
+    @Override
     public void onResume() {
    detectPlayButton();
         super.onResume();
@@ -247,7 +272,7 @@ return timelabel;
    if(mMediaPlayer != null)
        mMediaPlayer.stop();
         number = Number;
-        mCurrentMusic = mMusicList.get(number);
+        mCurrentMusic = playingMusicList.get(number);
         mMediaPlayer = MediaPlayer.create(getActivity(),Uri.fromFile(new File(mCurrentMusic.getPath())));
 
         artistTextFiled.setText(" -"+mCurrentMusic.getArtist());
@@ -257,16 +282,21 @@ return timelabel;
         totalTime = mMediaPlayer.getDuration();
         timeSeekBar.setMax(totalTime);
         if(mCurrentMusic.getCoverPath() != null)
-        mCoverArt.setImageBitmap(PictureUtils.getScaledBitmap(mCurrentMusic.getCoverPath(),getActivity()));
+        mCoverArt.setImageBitmap(PictureUtils.getScaledBitmap(mCurrentMusic.getCoverPath(),300,300));
         else
             mCoverArt.setImageResource(R.drawable.music);
-        nextTextView.setText(mMusicList.get(number != mMusicList.size()-1 ? number+1 : 0).getTitle());
+        setNextMusicLabel();
 
-    mMediaPlayer.start();
+        mMediaPlayer.start();
     detectPlayButton();
 
     }
-   private void detectPlayButton(){
+
+    private void setNextMusicLabel() {
+        nextTextView.setText(playingMusicList.get(number != playingMusicList.size()-1 ? number+1 : 0).getTitle());
+    }
+
+    private void detectPlayButton(){
        if(mMediaPlayer.isPlaying())
            playButton.setBackgroundResource(R.drawable.pause);
        else

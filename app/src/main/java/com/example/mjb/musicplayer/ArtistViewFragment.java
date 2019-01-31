@@ -2,11 +2,13 @@ package com.example.mjb.musicplayer;
 
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +34,7 @@ import io.github.luizgrp.sectionedrecyclerviewadapter.StatelessSection;
  */
 public class ArtistViewFragment extends Fragment {
     Artist artist;
-    View.OnClickListener onClickListener;
+
 
 RecyclerView mRecyclerView;
     public ArtistViewFragment() {
@@ -111,7 +113,7 @@ RecyclerView mRecyclerView;
             albumHolder.nameTextview.setText(album.getName());
             albumHolder.songsTextView.setText(album.getArtist());
             if(album.getMusicList().get(0).getCoverPath() != null){
-               albumHolder.mCircleImageView.setImageBitmap(PictureUtils.getScaledBitmap(album.getMusicList().get(0).getCoverPath(),getActivity()));
+               albumHolder.mCircleImageView.setImageBitmap(PictureUtils.getScaledBitmap(album.getMusicList().get(0).getCoverPath(),100,100));
             }
            holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -179,20 +181,20 @@ RecyclerView mRecyclerView;
         public void onBindItemViewHolder(RecyclerView.ViewHolder holder, int position) {
             MusicHolder musicHolder = (MusicHolder) holder;
           final Music  mMusic = mMusics.get(position);
-            if (mMusic.getCoverPath() != null)
-               musicHolder.coverart.setImageBitmap(PictureUtils.getScaledBitmap(mMusic.getCoverPath(),getActivity()));
-
+            if (mMusic.getCoverPath() != null) {
+                Bitmap bitmap = PictureUtils.getScaledBitmap(mMusic.getCoverPath(),400,400);
+                musicHolder.coverart.setImageBitmap(bitmap);
+//                if(bitmap!=null)
+//                {
+//                    bitmap.recycle();
+//                    bitmap=null;
+//                }
+            }
            musicHolder.titleTextview.setText(mMusic.getTitle() != null ? mMusic.getTitle() : "Unknon title");
             musicHolder.artistTextView.setText(mMusic.getArtist() != null ? mMusic.getArtist() : "Unknon Artist");
+            musicHolder.mMusic = mMusic;
 
-             onClickListener = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = Player.newIntent(new ArrayList<Music>(artist.getSongs()),artist.getSongs().indexOf(mMusic),getActivity());
-                    startActivity(intent);
-                }
-            };
-            holder.itemView.setOnClickListener(onClickListener);
+
 
 
 
@@ -212,6 +214,16 @@ RecyclerView mRecyclerView;
             coverart = itemView.findViewById(R.id.item_song_cover);
             titleTextview = itemView.findViewById(R.id.item_song_title);
             artistTextView = itemView.findViewById(R.id.item_song_artist);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d("mamad",artist.getSongs().toString());
+                    System.out.println(getAdapterPosition());
+                    Intent intent = Player.newIntent(new ArrayList<Music>(artist.getSongs()),artist.getSongs().indexOf(mMusic),getActivity());
+                    startActivity(intent);
+                }
+            });
 
 
         }

@@ -38,6 +38,7 @@ public class PictureUtils {
         Point point = new Point();
         activity.getWindowManager().getDefaultDisplay().getSize(point);
 
+
         return getScaledBitmap(path, point.x, point.y);
     }
     public static String getImageRealPath(ContentResolver contentResolver, Uri uri)
