@@ -23,7 +23,8 @@ public class ViewPagerActivity extends AppCompatActivity {
     TabItem mTabItemLeft;
     TabItem mTabItemCenter;
     TabItem mTabItemRight;
-    MusicLab mMusicLab;
+    TabItem mTabItemSearch;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,18 +35,18 @@ public class ViewPagerActivity extends AppCompatActivity {
         mTabItemLeft = findViewById(R.id.tab_left);
         mTabItemCenter = findViewById(R.id.tab_center);
         mTabItemRight = findViewById(R.id.tab_right);
+        mTabItemSearch = findViewById(R.id.tab_search);
         mViewPager.setOffscreenPageLimit(2);
-        mMusicLab = new MusicLab(this);
+
 
         mViewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
-
-
             @Override
             public Fragment getItem(int position) {
                 switch (position){
-                    case 0 :return MusicListFragment.newInstance(mMusicLab);
-                    case 1 : return ArtistListFragment.newInstance(mMusicLab);
-                    case 2 : return AlbumListFragment.newInstance(mMusicLab);
+                    case 0 :return MusicListFragment.newInstance();
+                    case 1 : return ArtistListFragment.newInstance();
+                    case 2 : return AlbumListFragment.newInstance();
+                    case 3 : return SearchFragment.newInstance();
                     default:return null;
                 }
 
@@ -61,14 +62,17 @@ public class ViewPagerActivity extends AppCompatActivity {
                         return getResources().getString(R.string.artists);
                     case 2:
                         return getResources().getString(R.string.albums);
+                    case 3:
+                        return "dssdsd";
                     default:
                         return null;
                 }
+
             }
 
             @Override
             public int getCount() {
-                return 3;
+                return 4;
             }
         });
 

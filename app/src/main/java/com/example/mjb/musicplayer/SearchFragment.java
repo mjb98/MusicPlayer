@@ -2,7 +2,6 @@ package com.example.mjb.musicplayer;
 
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -20,7 +19,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.mjb.musicplayer.model.Album;
 import com.example.mjb.musicplayer.model.Artist;
 import com.example.mjb.musicplayer.model.Music;
-import com.example.mjb.todo.utils.PictureUtils;
+import com.example.mjb.musicplayer.model.MusicLab;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,46 +34,106 @@ import io.github.luizgrp.sectionedrecyclerviewadapter.StatelessSection;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ArtistViewFragment extends Fragment {
-    Artist artist;
+public class SearchFragment extends Fragment {
+
+    RecyclerView mRecyclerView;
 
 
-RecyclerView mRecyclerView;
-    public ArtistViewFragment() {
-        // Required empty public constructor
-    }
-
-    public static ArtistViewFragment newInstance(Artist artist) {
+    public static SearchFragment newInstance() {
 
         Bundle args = new Bundle();
-        args.putSerializable("dsdsddssd",artist);
-
-        ArtistViewFragment fragment = new ArtistViewFragment();
+        SearchFragment fragment = new SearchFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
+
+    public SearchFragment() {
+        // Required empty public constructor
+    }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_artist_view, container, false);
-
+     View  view = inflater.inflate(R.layout.fragment_search, container, false);
         SectionedRecyclerViewAdapter sectionAdapter = new SectionedRecyclerViewAdapter();
+        MusicLab musicLab = MusicLab.getInstance(getActivity());
+        sectionAdapter.addSection(new ArtistSection(musicLab.getArtistList()));
+        sectionAdapter.addSection(new MusicSection(musicLab.getMusicList()));
+        sectionAdapter.addSection(new AlbumSection(musicLab.getAlbumList()));
 
- artist = ((Artist) getArguments().getSerializable("dsdsddssd"));
-        sectionAdapter.addSection(new AlbumSection(artist.getAlbums()));
-        sectionAdapter.addSection(new MusicSection(artist.getSongs()));
-
-// Set up your RecyclerView with the SectionedRecyclerViewAdapter
-         mRecyclerView = view.findViewById(R.id.artistview_recyclerview);
+        mRecyclerView = view.findViewById(R.id.search_recuclerview);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.setAdapter(sectionAdapter);
-
-
         return view;
+    }
+    class ArtistSection extends StatelessSection {
+        String title = "Artists";
+        List<Artist> mArtistList;
+
+        public ArtistSection(List<Artist> artistList) {
+
+            super(SectionParameters.builder()
+                    .itemResourceId(R.layout.recyclerview_artist_item)
+                    .headerResourceId(R.layout.header_artists)
+                    .build());
+            mArtistList = artistList;
+        }
+
+        @Override
+        public int getContentItemsTotal() {
+            return mArtistList.size(); // number of items of this section
+        }
+
+        @Override
+        public RecyclerView.ViewHolder getItemViewHolder(View view) {
+            // return a custom instance of ViewHolder for the items of this section
+            return new ArtistViewHolder(view);
+        }
+
+        @Override
+        public void onBindItemViewHolder(RecyclerView.ViewHolder holder, int position) {
+            ArtistViewHolder itemHolder = (ArtistViewHolder) holder;
+
+            // bind your view here
+            itemHolder.bindArtist(mArtistList.get(position));
+        }
+    }
+    class ArtistViewHolder extends RecyclerView.ViewHolder {
+        private CircleImageView mCircleImageView;
+        private TextView nameTextview, songsTextView;
+        private Artist mArtist;
+
+
+        public ArtistViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            mCircleImageView = itemView.findViewById(R.id.artist_item_imageView);
+            nameTextview = itemView.findViewById(R.id.artist_item_artistview);
+            songsTextView = itemView.findViewById(R.id.artist_item_songs);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = ArtistViewActivity.newIntent(mArtist, getActivity());
+                    startActivity(intent);
+
+                }
+            });
+        }
+        public void bindArtist(Artist artist) {
+            mArtist = artist;
+            nameTextview.setText(artist.getName());
+            songsTextView.setText(artist.getAlbums().size() + " Album  " + artist.getSongs().size() + " song");
+            if (artist.getSongs().get(0).getCoverPath() != null) {
+                Glide.with(getContext())
+                        .load(new File(mArtist.getSongs().get(0).getCoverPath()))
+                        .apply(new RequestOptions().override(80, 80))
+                        .into(mCircleImageView);
+            }
+        }
+
     }
     class AlbumSection extends StatelessSection {
         String title = "Albums";
@@ -112,7 +171,7 @@ RecyclerView mRecyclerView;
         @Override
         public void onBindItemViewHolder(RecyclerView.ViewHolder holder, int position) {
             AlbumHolder albumHolder = (AlbumHolder) holder;
-           final Album album = mAlbums.get(position);
+            final Album album = mAlbums.get(position);
             albumHolder.nameTextview.setText(album.getName());
             albumHolder.songsTextView.setText(album.getArtist());
             if(album.getMusicList().get(0).getCoverPath() != null){
@@ -121,7 +180,7 @@ RecyclerView mRecyclerView;
                         .apply(new RequestOptions().override(80, 80))
                         .into(albumHolder.mCircleImageView);
             }
-           holder.itemView.setOnClickListener(new View.OnClickListener() {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = ArtistViewActivity.newIntent(album,getActivity());
@@ -148,7 +207,7 @@ RecyclerView mRecyclerView;
             songsTextView = itemView.findViewById(R.id.artist_item_songs);
         }
 
-        }
+    }
     class MusicSection extends StatelessSection {
         List<Music> mMusics = new ArrayList<>();
         String title = "Albums";
@@ -185,8 +244,8 @@ RecyclerView mRecyclerView;
 
         @Override
         public void onBindItemViewHolder(RecyclerView.ViewHolder holder, int position) {
-            MusicHolder musicHolder = (MusicHolder) holder;
-          final Music  mMusic = mMusics.get(position);
+            MusicHolder musicHolder = ((MusicHolder) holder);
+            final Music  mMusic = mMusics.get(position);
             if (mMusic.getCoverPath() != null) {
                 Glide.with(getContext())
                         .load(new File(mMusic.getCoverPath()))
@@ -198,7 +257,7 @@ RecyclerView mRecyclerView;
 //                    bitmap=null;
 //                }
             }
-           musicHolder.titleTextview.setText(mMusic.getTitle() != null ? mMusic.getTitle() : "Unknon title");
+            musicHolder.titleTextview.setText(mMusic.getTitle() != null ? mMusic.getTitle() : "Unknon title");
             musicHolder.artistTextView.setText(mMusic.getArtist() != null ? mMusic.getArtist() : "Unknon Artist");
             musicHolder.mMusic = mMusic;
 
@@ -226,23 +285,13 @@ RecyclerView mRecyclerView;
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d("mamad",artist.getSongs().toString());
-                    System.out.println(getAdapterPosition());
-                    Intent intent = PlayerActivity.newIntent(new ArrayList<Music>(artist.getSongs()),artist.getSongs().indexOf(mMusic),getActivity());
-                    startActivity(intent);
+
                 }
             });
 
 
         }
+
     }
 
-    @Override
-    public void onResume() {
-
-        getActivity().setTitle(artist.getName());
-        super.onResume();
-    }
 }
-
-

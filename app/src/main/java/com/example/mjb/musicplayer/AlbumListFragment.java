@@ -13,10 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.mjb.musicplayer.model.Album;
 import com.example.mjb.musicplayer.model.MusicLab;
 import com.example.mjb.todo.utils.PictureUtils;
 
+import java.io.File;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -25,30 +28,27 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * A simple {@link Fragment} subclass.
  */
 public class AlbumListFragment extends Fragment {
+    public static final String MUSICLAB_TAG = "album.musiclist";
     private RecyclerView mRecyclerView;
     private MusicLab mMusicLab;
     private AlbumAdapter mAlbumAdapter;
-
-    public static final String MUSICLAB_TAG = "album.musiclist";
-
-    public static AlbumListFragment newInstance(MusicLab Musiclab) {
-
-        Bundle args = new Bundle();
-        args.putSerializable(MUSICLAB_TAG,Musiclab);
-        AlbumListFragment fragment = new AlbumListFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
 
     public AlbumListFragment() {
         // Required empty public constructor
     }
 
+    public static AlbumListFragment newInstance() {
+
+        Bundle args = new Bundle();
+        AlbumListFragment fragment = new AlbumListFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMusicLab = (MusicLab) getArguments().getSerializable(MUSICLAB_TAG);
+        mMusicLab = MusicLab.getInstance(getActivity());
     }
 
     @Override
@@ -63,10 +63,10 @@ public class AlbumListFragment extends Fragment {
     }
 
 
-    public  class AlbumHolder extends RecyclerView.ViewHolder {
+    public class AlbumHolder extends RecyclerView.ViewHolder {
 
         private CircleImageView mCircleImageView;
-        private TextView nameTextview,songsTextView;
+        private TextView nameTextview, songsTextView;
         private Album mAlbum;
 
 
@@ -79,22 +79,27 @@ public class AlbumListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = ArtistViewActivity.newIntent(mAlbum,getActivity());
+                    Intent intent = ArtistViewActivity.newIntent(mAlbum, getActivity());
                     startActivity(intent);
                 }
             });
         }
+
         public void bindArtist(Album album) {
             mAlbum = album;
             nameTextview.setText(album.getName());
             songsTextView.setText(album.getArtist());
-            if(album.getMusicList().get(0).getCoverPath() != null){
-                mCircleImageView.setImageBitmap(PictureUtils.getScaledBitmap(album.getMusicList().get(0).getCoverPath(),100,100));
+            if (album.getMusicList().get(0).getCoverPath() != null) {
+                Glide.with(getContext())
+                        .load(new File(album.getMusicList().get(0).getCoverPath()))
+                        .apply(new RequestOptions().override(80, 80))
+                        .into(mCircleImageView);
             }
         }
 
     }
-    private class AlbumAdapter extends  RecyclerView.Adapter<AlbumHolder>{
+
+    private class AlbumAdapter extends RecyclerView.Adapter<AlbumHolder> {
 
         private List<Album> mAlbumList;
 

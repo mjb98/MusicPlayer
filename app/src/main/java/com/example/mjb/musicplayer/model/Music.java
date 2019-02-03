@@ -2,9 +2,9 @@ package com.example.mjb.musicplayer.model;
 
 import android.support.annotation.Nullable;
 
+import com.example.mjb.musicplayer.database.App;
+
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Music implements Serializable {
 
@@ -13,14 +13,32 @@ public class Music implements Serializable {
         private String album;
         private String artist;
         private String coverPath;
+        private Boolean favorite;
+        private String musicID;
 
-    public Music(String path, String title, String album, String artist,String coverPath) {
+    public Boolean getFavorite() {
+        return favorite;
+    }
+
+
+
+    public String getMusicID() {
+        return musicID;
+    }
+
+    public Music(String path, String title, String album, String artist, String coverPath, String ID) {
+        favorite = false;
         this.path = path;
         this.title = title;
         this.album = album;
         this.artist = artist;
         this.coverPath = coverPath;
+        this.musicID = ID;
 
+    }
+
+    public void setFavorite(Boolean favorite) {
+        this.favorite = favorite;
     }
 
     public String getCoverPath() {
@@ -68,7 +86,7 @@ public class Music implements Serializable {
     public boolean equals(@Nullable Object obj) {
        if (obj instanceof  Music){
            Music music = (Music) obj;
-           if (this.getTitle().equals(music.getTitle())&& this.getArtist().equals(music.getArtist())&&this.album.equals(music.getAlbum())){
+           if (((Music) obj).musicID.equals(musicID)){
                return true;
            }else {
                return false;

@@ -6,20 +6,20 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.mjb.musicplayer.model.Artist;
-import com.example.mjb.musicplayer.model.Music;
 import com.example.mjb.musicplayer.model.MusicLab;
 import com.example.mjb.todo.utils.PictureUtils;
 
+import java.io.File;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -28,30 +28,28 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * A simple {@link Fragment} subclass.
  */
 public class ArtistListFragment extends Fragment {
+    public static final String MUSICLAB_TAG = "artist.musiclist";
     private RecyclerView mRecyclerView;
     private MusicLab mMusicLab;
     private ArtistAdapter mArtistAdapter;
-
-    public static final String MUSICLAB_TAG = "artist.musiclist";
-
-    public static ArtistListFragment newInstance(MusicLab Musiclab) {
-
-        Bundle args = new Bundle();
-        args.putSerializable(MUSICLAB_TAG,Musiclab);
-        ArtistListFragment fragment = new ArtistListFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
 
     public ArtistListFragment() {
         // Required empty public constructor
     }
 
+    public static ArtistListFragment newInstance() {
+
+        Bundle args = new Bundle();
+
+        ArtistListFragment fragment = new ArtistListFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMusicLab = (MusicLab) getArguments().getSerializable(MUSICLAB_TAG);
+        mMusicLab = MusicLab.getInstance(getActivity());
     }
 
     @Override
@@ -69,7 +67,7 @@ public class ArtistListFragment extends Fragment {
     private class ArtistHolder extends RecyclerView.ViewHolder {
 
         private CircleImageView mCircleImageView;
-        private TextView nameTextview,songsTextView;
+        private TextView nameTextview, songsTextView;
         private Artist mArtist;
 
 
@@ -82,23 +80,28 @@ public class ArtistListFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                   Intent intent = ArtistViewActivity.newIntent(mArtist,getActivity());
-                    startActivity(intent );
+                    Intent intent = ArtistViewActivity.newIntent(mArtist, getActivity());
+                    startActivity(intent);
 
                 }
             });
         }
+
         public void bindArtist(Artist artist) {
             mArtist = artist;
             nameTextview.setText(artist.getName());
-            songsTextView.setText(artist.getAlbums().size()+" Album  "+artist.getSongs().size()+" song");
-            if(artist.getSongs().get(0).getCoverPath() != null){
-                mCircleImageView.setImageBitmap(PictureUtils.getScaledBitmap(artist.getSongs().get(0).getCoverPath(),100,100));
+            songsTextView.setText(artist.getAlbums().size() + " Album  " + artist.getSongs().size() + " song");
+            if (artist.getSongs().get(0).getCoverPath() != null) {
+                Glide.with(getContext())
+                        .load(new File(mArtist.getSongs().get(0).getCoverPath()))
+                        .apply(new RequestOptions().override(80, 80))
+                        .into(mCircleImageView);
             }
         }
 
     }
-    private class ArtistAdapter extends  RecyclerView.Adapter<ArtistHolder>{
+
+    private class ArtistAdapter extends RecyclerView.Adapter<ArtistHolder> {
 
         private List<Artist> mArtistList;
 

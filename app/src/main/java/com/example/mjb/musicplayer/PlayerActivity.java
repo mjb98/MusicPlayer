@@ -2,21 +2,18 @@ package com.example.mjb.musicplayer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 
 import com.example.mjb.musicplayer.model.Album;
 import com.example.mjb.musicplayer.model.Artist;
 import com.example.mjb.musicplayer.model.Music;
 
-import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 
-public class Player extends AppCompatActivity {
+public class PlayerActivity extends AppCompatActivity {
     private Album mAlbum;
     private Artist mArtist;
     private int number;
@@ -35,19 +32,19 @@ public class Player extends AppCompatActivity {
 
 
     public static  Intent newIntent(Album album,int number, Context context) {
-        Intent intent = new Intent(context,Player.class);
+        Intent intent = new Intent(context,PlayerActivity.class);
         intent.putExtra("albumforplay",album);
         intent.putExtra("numberintent",number);
         return intent;
     }
     public static  Intent newIntent(Artist artist,int number, Context context) {
-        Intent intent = new Intent(context,Player.class);
+        Intent intent = new Intent(context,PlayerActivity.class);
         intent.putExtra("aritistforplay",artist);
         intent.putExtra("numberintent",number);
         return intent;
     }
     public static  Intent newIntent(ArrayList<Music> musicList, int number, Context context) {
-        Intent intent = new Intent(context,Player.class);
+        Intent intent = new Intent(context,PlayerActivity.class);
         intent.putExtra("musis", musicList);
         intent.putExtra("numberintent",number);
         return intent;

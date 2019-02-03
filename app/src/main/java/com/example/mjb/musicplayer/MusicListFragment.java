@@ -2,6 +2,8 @@ package com.example.mjb.musicplayer;
 
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,16 +11,22 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.mjb.musicplayer.model.Album;
 import com.example.mjb.musicplayer.model.Music;
 import com.example.mjb.musicplayer.model.MusicLab;
 import com.example.mjb.todo.utils.PictureUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,36 +36,73 @@ import java.util.List;
  */
 public class MusicListFragment extends Fragment {
     public static final String Album_Tag = "dsds";
+    public static final String MUSICLAB_TAG = "musicplayer.musiclist";
     private RecyclerView mRecyclerView;
     private MusicLab mMusicLab;
     private Album mAlbum;
     private MusicAdapter mMusicAdapter;
-    public static final String MUSICLAB_TAG = "musicplayer.musiclist";
+    private Boolean favoriteMode = false;
+    List<Music> musicList;
 
+    public void setFavoriteMode(Boolean favoriteMode) {
+
+        if(favoriteMode){
+            List<Music> favList = new ArrayList<>();
+            for(Music music : MusicLab.getInstance(getActivity()).getMusicList()){
+                if(music.getFavorite())
+                    favList.add(music);
+            }
+
+            mMusicAdapter.setMusicList(favList);
+            mMusicAdapter.notifyDataSetChanged();
+        }else {
+            mMusicAdapter.setMusicList(musicList);
+            mMusicAdapter.notifyDataSetChanged();
+
+
+        }
+
+
+
+        this.favoriteMode = favoriteMode;
+    }
 
     public MusicListFragment() {
         // Required empty public constructor
     }
-    public static MusicListFragment newInstance(MusicLab MusicLab) {
+
+    public static MusicListFragment newInstance() {
         MusicListFragment fragment = new MusicListFragment();
         Bundle args = new Bundle();
-        args.putSerializable(MUSICLAB_TAG,MusicLab);
         fragment.setArguments(args);
         return fragment;
     }
+
     public static MusicListFragment newInstance(Album album) {
         MusicListFragment fragment = new MusicListFragment();
         Bundle args = new Bundle();
-        args.putSerializable(Album_Tag,album);
+        args.putSerializable(Album_Tag, album);
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
-        mMusicLab = (MusicLab) getArguments().getSerializable(MUSICLAB_TAG);
+        mMusicLab = MusicLab.getInstance(getActivity());
         mAlbum = (Album) getArguments().getSerializable(Album_Tag);
+        setHasOptionsMenu(mAlbum == null);
+
+
+
+
+
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.musiclist_menu,menu);
     }
 
     @Override
@@ -66,23 +111,39 @@ public class MusicListFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_list, container, false);
         mRecyclerView = view.findViewById(R.id.song_list_recyclerview);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(),getResources().getInteger(R.integer.columns_count)));
-        if(mMusicLab != null)
-        mMusicAdapter = new MusicAdapter(mMusicLab.getMusicList());
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.columns_count)));
+        if (mAlbum == null)
+            mMusicAdapter = new MusicAdapter(mMusicLab.getMusicList());
         else {
             mMusicAdapter = new MusicAdapter(mAlbum.getMusicList());
         }
         mRecyclerView.setAdapter(mMusicAdapter);
+        musicList = mMusicAdapter.mMusicList;
+        if(savedInstanceState != null){
+            favoriteMode = savedInstanceState.getBoolean("favMode");
+            if(favoriteMode)
+                setFavoriteMode(true);
 
-
-
+        }
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        if (mAlbum != null)
+            getActivity().setTitle(mAlbum.getName());
+
+        else {
+            mMusicAdapter.notifyDataSetChanged();
+            //setFavoriteMode(favoriteMode);
+        }
+        super.onResume();
     }
 
     private class MusicHolder extends RecyclerView.ViewHolder {
 
         private ImageView coverart;
-        private TextView titleTextview,artistTextView;
+        private TextView titleTextview, artistTextView;
         private Music mMusic;
 
 
@@ -95,10 +156,12 @@ public class MusicListFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     Intent intent;
-                    if(mAlbum != null) {
-                        intent = Player.newIntent(new ArrayList<Music>(mAlbum.getMusicList()), getAdapterPosition(), getActivity());
-                    }else
-                        intent = Player.newIntent(new ArrayList<Music>(mMusicLab.getMusicList()),getAdapterPosition(),getActivity());
+                    if (mAlbum != null) {
+                        intent = PlayerActivity.newIntent(new ArrayList<Music>(mAlbum.getMusicList()), getAdapterPosition(), getActivity());
+                    } else
+                        if(!favoriteMode)
+                        intent = PlayerActivity.newIntent(new ArrayList<Music>(mMusicLab.getMusicList()), getAdapterPosition(), getActivity());
+                    else intent =PlayerActivity.newIntent(new ArrayList<Music>(mMusicAdapter.mMusicList),getAdapterPosition(),getActivity());
                     startActivity(intent);
 
 
@@ -106,24 +169,38 @@ public class MusicListFragment extends Fragment {
             });
 
         }
+
+
+
         public void bindMusic(Music music) {
             mMusic = music;
             if (music.getCoverPath() != null)
-            coverart.setImageBitmap(PictureUtils.getScaledBitmap(music.getCoverPath(),400,400));
+
+            {
+
+                Glide.with(getContext())
+                        .load(new File(music.getCoverPath()))
+                        .apply(new RequestOptions().override(300, 300))
+                        .into(coverart);
+
+            }
+
             titleTextview.setText(music.getTitle() != null ? music.getTitle() : "Unknon title");
             artistTextView.setText(music.getArtist() != null ? music.getArtist() : "Unknon Artist");
         }
 
+
     }
-    private class MusicAdapter extends  RecyclerView.Adapter<MusicHolder>{
+
+    private class MusicAdapter extends RecyclerView.Adapter<MusicHolder> {
 
         private List<Music> mMusicList;
 
-        public void setMusicList(List<Music> musicList) {
+        public MusicAdapter(List<Music> musicList) {
             mMusicList = musicList;
         }
 
-        public MusicAdapter(List<Music> musicList) {
+        public void setMusicList(List<Music> musicList) {
             mMusicList = musicList;
         }
 
@@ -145,15 +222,56 @@ public class MusicListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mMusicList.size();
+
         }
     }
 
     @Override
-    public void onResume() {
-        if (mAlbum != null)
-            getActivity().setTitle(mAlbum.getName());
-        super.onResume();
+    public void onPrepareOptionsMenu(Menu menu) {
+        if(favoriteMode){
+            menu.getItem(0).setIcon(getResources().getDrawable(R.drawable.showmore));
+            menu.getItem(0).setTitle("");
+        }else {
+            menu.getItem(0).setIcon(getResources().getDrawable(R.drawable.heart_white));
+            menu.getItem(0).setTitle("favoirtes");
+        }
+
+        super.onPrepareOptionsMenu(menu);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
+        switch (item.getItemId()){
+            case R.id.favoirite_button :{
+                if(!favoriteMode){
+                    setFavoriteMode(true);
+                    item.setIcon(getResources().getDrawable(R.drawable.showmore));
+
+                }else {
+                    setFavoriteMode(false);
+                    item.setIcon(getResources().getDrawable(R.drawable.heart_white));
+                    item.setTitle("favorites");
+                }
+                return true;
+
+            }
+
+        }
+
+
+
+
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+
+        outState.putBoolean("favMode",favoriteMode);
+
+
+        super.onSaveInstanceState(outState);
+    }
 }

@@ -3,8 +3,6 @@ package com.example.mjb.musicplayer;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 
 import com.example.mjb.musicplayer.model.Album;
 import com.example.mjb.musicplayer.model.Artist;
